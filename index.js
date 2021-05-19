@@ -65,6 +65,27 @@ function composeSearchBar(){
     searchInput.setAttribute("name", "search-breweries")
     searchInput.setAttribute("type", "text")
     searchForm.append(searchLabel, searchInput)
+
+    searchForm.addEventListener("submit", function(event){
+        event.preventDefault()
+        removeCurrentDisplayList()
+
+        matchedResultArray = state.breweries.filter(function(brewery){
+            let lowercaseName = brewery.name.toLowerCase()
+            let lowercaseState = brewery.state.toLowerCase()
+            let lowercaseAddress = brewery.street.toLowerCase()
+        
+            let lowercaseSearchInput = searchInput.value.toLowerCase()
+            return lowercaseName.includes(lowercaseSearchInput) || lowercaseState.includes(lowercaseSearchInput) || lowercaseAddress.includes(lowercaseSearchInput)
+        })
+
+        renderBreweries(matchedResultArray)
+        searchForm.reset()
+    })
+}
+
+function searchBar(){
+    
 }
 
 function composeList(){
@@ -119,6 +140,7 @@ function filterByState(){
         })
 
         renderBreweries(filteredByStateArray)
+        selectStateForm.reset()
     })
 }
 
@@ -132,6 +154,8 @@ function removeLi(liEl){
     liEl.remove()
 }
 
+
+
 function runPage(){
     getAPIdata()
     .then(function (data) {
@@ -142,13 +166,14 @@ function runPage(){
     })
     .then(function(){
         renderBreweries(state.breweries)
+        filterByState()
     })
 }
 
 
 
 runPage()
-filterByState()
+
 
 
 
