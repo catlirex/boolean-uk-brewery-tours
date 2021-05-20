@@ -143,18 +143,7 @@ function composeTypeFilter(){
     typeForm.append(typeLabel,typeSelect)
     typeSelect.append(emptyOption, microOption, regionalOption, brewpubOption)
 
-    let cityHeadDiv = document.createElement("div")
-    cityHeadDiv.setAttribute("class", "filter-by-city-heading")
-
-    let h3El = document.createElement("h3")
-    h3El.innerText = "Cities"
-
-    let clearBtn = document.createElement("button")
-    clearBtn.setAttribute("class", "clear-all-btn")
-    clearBtn.innerText = "Clear all"
-    cityHeadDiv.append(h3El, clearBtn)
-
-    filtersAside.append(h2El, typeForm, cityHeadDiv)
+    filtersAside.append(h2El, typeForm)
 }
 
 function composeCityFilterHead(){
@@ -169,8 +158,25 @@ function composeCityFilterHead(){
     let clearBtn = document.createElement("button")
     clearBtn.setAttribute("class", "clear-all-btn")
     clearBtn.innerText = "Clear all"
+    clearBtn.addEventListener("click", function(){
+        let cityForm = document.getElementById("filter-by-city-form")
+        let allCheckBox = cityForm.querySelectorAll("input")
+        allCheckBox.forEach(uncheckBox)
+
+        if (state.typeFilteredBreweries !== undefined){
+            renderBreweries(state.typeFilteredBreweries)
+        }
+        else{
+            renderBreweries(state.breweries)
+        }
+    })
+
     cityHeadDiv.append(h3El, clearBtn)
     filtersAside.append(cityHeadDiv)
+}
+
+function uncheckBox(input){
+    input.checked = false
 }
 
 function composeCityFilter(){
@@ -238,11 +244,6 @@ function removeCheckedCity(checkedCity){
     }
 }
 
-    
-
-
-
-
 function createCityCheckbox(city){
     let cityFilterInput = document.createElement("input")
     cityFilterInput.setAttribute("type", "checkbox")
@@ -280,6 +281,8 @@ function renderBreweries(arrayOfBreweries){
 
     firstTenBreweries = arrayOfBreweries.slice(0, 10)
     firstTenBreweries.map(renderBrewery)
+
+    
 }
 
 function renderBrewery(brewery){
