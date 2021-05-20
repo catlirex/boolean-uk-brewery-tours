@@ -108,6 +108,13 @@ function composeTypeFilter(){
     let typeSelect = document.createElement("select")
     typeSelect.setAttribute("name", 'filter-by-type')
     typeSelect.setAttribute("id", 'filter-by-type')
+    typeSelect.addEventListener('change', function(event){
+        event.preventDefault()
+        let matchTypeBreweries = state.breweries.filter(function(brewery){
+            return brewery.brewery_type === event.target.value
+        })
+        renderBreweries(matchTypeBreweries)
+    })
 
     let emptyOption = document.createElement("option")
     emptyOption.setAttribute("value", "")
