@@ -2,8 +2,11 @@ let state = {
     breweries:[],
     cities:[],
     cityFilteredBreweries:[],
-    typeFilteredBreweries:[]
-}
+    typeFilteredBreweries:[],
+    endIndex:0
+};
+
+console.log(state.endIndex)
 
 function getBreweriesByState(state){
    return fetch(`https://api.openbrewerydb.org/breweries?by_state=${state}`)
@@ -270,19 +273,88 @@ function pushCitiesToState(){
 }
 
 function renderBreweries(arrayOfBreweries){
+    
     let perviousList = document.querySelector("ul")
-    if (perviousList !== null)perviousList.remove()
+    if (perviousList !== null) perviousList.remove()
+
+    let pageBtn = document.querySelectorAll(".page-button")
+    if (pageBtn !== null) pageBtn.forEach(removeLi)
 
     let articleEl = document.querySelector("article")
     let breweriesUl = document.createElement("ul")
     breweriesUl.setAttribute("class","breweries-list")
-
     articleEl.append(breweriesUl) 
 
-    firstTenBreweries = arrayOfBreweries.slice(0, 10)
-    firstTenBreweries.map(renderBrewery)
-
+    state.endIndex = 10
+    currentShowsBreweries = arrayOfBreweries.slice(0, 10)
+    currentShowsBreweries.map(renderBrewery)
     
+    if(arrayOfBreweries.length > state.endIndex)
+    nextPage(arrayOfBreweries, state.endIndex)
+ }
+
+
+function nextPage(arrayOfBreweries, endIndex){
+    
+    let nextPageBtn = document.createElement("button")
+    nextPageBtn.setAttribute("class", "page-button")
+    nextPageBtn.innerText = "Next"
+    
+    let articleEl = document.querySelector("article")
+        articleEl.after(nextPageBtn)
+
+    nextPageBtn.addEventListener("click", function(){
+        
+        let perviousList = document.querySelector("ul")
+        perviousList.remove()
+        nextPageBtn.remove()
+
+        let articleEl = document.querySelector("article")
+        let breweriesUl = document.createElement("ul")
+        breweriesUl.setAttribute("class","breweries-list")
+        articleEl.append(breweriesUl) 
+        
+        currentShowsBreweries = arrayOfBreweries.slice(endIndex, endIndex+10)
+        state.endIndex = endIndex +10
+
+        currentShowsBreweries.map(renderBrewery)
+        
+        perviousPage(arrayOfBreweries, state.endIndex)
+        if(arrayOfBreweries.length > state.endIndex) nextPage(arrayOfBreweries, state.endIndex)
+        })    
+        
+    
+        
+}
+
+function perviousPage(arrayOfBreweries, endIndex){
+
+    let perviousPageBtn = document.createElement("button")
+    perviousPageBtn.setAttribute("class", "page-button")
+    perviousPageBtn.innerText = "Pervious"
+
+    let articleEl = document.querySelector("article")
+        articleEl.after(perviousPageBtn)
+
+    perviousPageBtn.addEventListener("click", function(){
+        let perviousList = document.querySelector("ul")
+        perviousList.remove()
+        perviousPageBtn.remove()
+
+        let articleEl = document.querySelector("article")
+        let breweriesUl = document.createElement("ul")
+        breweriesUl.setAttribute("class","breweries-list")
+        articleEl.append(breweriesUl) 
+        
+        currentShowsBreweries = arrayOfBreweries.slice(endIndex-20, endIndex-10)
+        state.endIndex = endIndex - 10
+
+        currentShowsBreweries.map(renderBrewery)
+        
+        nextPage(arrayOfBreweries, state.endIndex) 
+        if(state.endIndex >= 20) perviousPage(arrayOfBreweries, state.endIndex)
+    })         
+
 }
 
 function renderBrewery(brewery){
@@ -327,9 +399,11 @@ function filterByState(){
             
         })
         .then(function(){
+            
             pushCitiesToState()
             renderBreweries(state.breweries)
             composeCityFilter()
+            
         })
 
         selectStateForm.reset()
@@ -363,6 +437,7 @@ function runPage(){
     composeTypeFilter()
     composeCityFilterHead()
     filterByState()
+    
 }
     
 runPage()
