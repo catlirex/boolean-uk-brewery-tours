@@ -1,6 +1,8 @@
 let state = {
     breweries:[],
-    cities:[]
+    cities:[],
+    cityFilteredBreweries:[],
+    typeFilteredBreweries:[]
 }
 
 function getBreweriesByState(state){
@@ -110,10 +112,16 @@ function composeTypeFilter(){
     typeSelect.setAttribute("id", 'filter-by-type')
     typeSelect.addEventListener('change', function(event){
         event.preventDefault()
-        let matchTypeBreweries = state.breweries.filter(function(brewery){
-            return brewery.brewery_type === event.target.value
-        })
-        renderBreweries(matchTypeBreweries)
+
+        if(event.target.value === ""){
+            renderBreweries(state.breweries)
+        }
+        else{
+            state.typeFilteredBreweries = state.breweries.filter(function(brewery){
+                return brewery.brewery_type === event.target.value
+            })
+            renderBreweries(state.typeFilteredBreweries)
+        }
     })
 
     let emptyOption = document.createElement("option")
@@ -149,6 +157,22 @@ function composeTypeFilter(){
     filtersAside.append(h2El, typeForm, cityHeadDiv)
 }
 
+function composeCityFilterHead(){
+    let filtersAside = document.querySelector(".filters-section")
+
+    let cityHeadDiv = document.createElement("div")
+    cityHeadDiv.setAttribute("class", "filter-by-city-heading")
+
+    let h3El = document.createElement("h3")
+    h3El.innerText = "Cities"
+
+    let clearBtn = document.createElement("button")
+    clearBtn.setAttribute("class", "clear-all-btn")
+    clearBtn.innerText = "Clear all"
+    cityHeadDiv.append(h3El, clearBtn)
+    filtersAside.append(cityHeadDiv)
+}
+
 function composeCityFilter(){
     let perviousForm = document.querySelector("#filter-by-city-form")
     if (perviousForm !== null)perviousForm.remove()
@@ -157,6 +181,17 @@ function composeCityFilter(){
 
     let cityForm = document.createElement("form")
     cityForm.setAttribute("id", "filter-by-city-form")
+    cityForm.addEventListener("change", function(event){
+        
+        if (event.target.checked === true){
+            addCheckedCity(event.target.value)
+        } else{
+            removeCheckedCity(event.target.value)
+        }
+        
+        console.log(event.target.checked, event.target.value)
+
+    })
 
     for(city of state.cities){
        let checkboxEls = createCityCheckbox(city)
@@ -166,12 +201,54 @@ function composeCityFilter(){
     filtersAside.append(cityForm)
 }
 
+function addCheckedCity(checkedCity){
+    let cityMatchedBreweries = []
+
+    if (state.typeFilteredBreweries !== undefined){
+        cityMatchedBreweries = state.typeFilteredBreweries.filter(function(brewery){
+            return brewery.city === checkedCity}) 
+    }else{
+        cityMatchedBreweries = state.breweries.filter(function(brewery){
+            return brewery.city === checkedCity}) 
+    }
+    
+    if(state.cityFilteredBreweries === undefined){
+        state.cityFilteredBreweries = cityMatchedBreweries
+    }
+    else{
+        state.cityFilteredBreweries.push.apply(state.cityFilteredBreweries, cityMatchedBreweries)
+    }
+
+    renderBreweries(state.cityFilteredBreweries)
+}
+
+function removeCheckedCity(checkedCity){
+    state.cityFilteredBreweries = state.cityFilteredBreweries.filter(function(brewery){
+        return brewery.city !== checkedCity}) 
+
+    renderBreweries(state.cityFilteredBreweries)
+
+    if (state.cityFilteredBreweries.length === 0){
+        if (state.typeFilteredBreweries !== undefined){
+            renderBreweries(state.typeFilteredBreweries)
+        }
+        else{
+            renderBreweries(state.breweries)
+        }
+    }
+}
+
+    
+
+
+
+
 function createCityCheckbox(city){
     let cityFilterInput = document.createElement("input")
     cityFilterInput.setAttribute("type", "checkbox")
     cityFilterInput.setAttribute("name", city)
     cityFilterInput.setAttribute("value", city)
-
+    
     let cityFilterLabel = document.createElement("label")
     cityFilterLabel.setAttribute("for", city)
     cityFilterLabel.innerText = city
@@ -281,6 +358,7 @@ function runPage(){
     composeMain()
     composeSearchBar()
     composeTypeFilter()
+    composeCityFilterHead()
     filterByState()
 }
     
