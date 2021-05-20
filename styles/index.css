@@ -239,3 +239,17 @@ article {
   justify-self: center;
   margin-bottom: 30px;
 }
+
+#booking-form {
+  display: grid;
+  grid-template-columns: 80px 180px;
+  grid-gap: 5px;
+}
+
+.check-availability {
+  align-self: center;
+  height: 50px;
+  background-color: #ffe082;
+  border-radius: 5px;
+  border: none;
+}

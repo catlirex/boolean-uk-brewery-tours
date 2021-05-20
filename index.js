@@ -6,8 +6,6 @@ let state = {
     endIndex:0
 };
 
-console.log(state.endIndex)
-
 function getBreweriesByState(state){
    return fetch(`https://api.openbrewerydb.org/breweries?by_state=${state}`)
     .then(function (response) {
@@ -380,7 +378,58 @@ function renderBrewery(brewery){
     postCodeText.innerHTML = "<strong>"+ brewery.state + " , " + brewery.postal_code +  "</strong>"
     addressSection.append(h3El, addressText, postCodeText)
 
-    liEl.append(nameH2, typeDiv, addressSection)
+    let checkBtn = document.createElement("button")
+    checkBtn.setAttribute("class", "check-availability")
+    checkBtn.innerText = "Check availability"
+    checkBtn.addEventListener("click", function(event){
+        bookingForm.style.visibility= "visible"
+    })
+
+
+    let bookingForm = document.createElement("form")
+    bookingForm.setAttribute("id", "booking-form")
+    bookingForm.style.visibility= "hidden"
+    bookingForm.addEventListener("submit", function(event){
+        event.preventDefault()
+        alert("Connecting to payment page...")
+        bookingForm.reset()
+    })
+
+    let dateLabel = document.createElement("label")
+    dateLabel.innerText = "Tour Date"
+    let dateInput = document.createElement("input")
+    dateInput.setAttribute("type", "date")
+    dateInput.required = true
+
+    let timeLabel = document.createElement("label")
+    timeLabel.innerText = "Time"
+    let timeInput = document.createElement("select")
+    timeInput.setAttribute("name", 'tour-time')
+    timeInput.setAttribute("id", 'tour-time')
+    timeInput.required = true
+    let bookNowBtn = document.createElement("button")
+    bookNowBtn.setAttribute("type","submit")
+    bookNowBtn.innerText = "BookNow"
+
+    let emptyDiv = document.createElement("div")
+    
+    bookingForm.append(dateLabel, dateInput, timeLabel, timeInput, emptyDiv, bookNowBtn)
+
+    let emptyOption = document.createElement("option")
+    emptyOption.setAttribute("value", "")
+    emptyOption.innerText = "Select meetup time"
+    timeInput.append(emptyOption)
+    
+
+    let timeOptions = ["08:00", "10:00", "13:00","15:00"]
+    for (time of timeOptions){
+        let timeOption = document.createElement("option")
+        timeOption.setAttribute("value", time)
+        timeOption.innerText = time
+        timeInput.append(timeOption)
+    }
+
+    liEl.append(nameH2, typeDiv, addressSection, bookingForm, checkBtn)
 }
 
 function filterByState(){
