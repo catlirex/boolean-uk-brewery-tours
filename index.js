@@ -4,7 +4,7 @@ let state = {
 }
 
 function getBreweriesByState(state){
-   return fetch(`https://api.openbrewerydb.org/breweries?by_state=${state}&per_page=10`)
+   return fetch(`https://api.openbrewerydb.org/breweries?by_state=${state}`)
     .then(function (response) {
     return response.json()
     })
@@ -13,7 +13,11 @@ function getBreweriesByState(state){
 function pushCleanDataToState(data){
     console.log("data:", data)
 
-    for (brewery of data){
+    let usefulBrewery = data.filter(function(brewery){
+        return brewery.brewery_type ===  "micro" || brewery.brewery_type === "regional" || brewery.brewery_type === "brewpub"
+    })
+
+    for (brewery of usefulBrewery){
     let cleanedData = {}
 
     cleanedData.id = brewery.id
@@ -35,6 +39,8 @@ function pushCleanDataToState(data){
 
 function composeMain(){
     let mainEl = document.querySelector("main")
+        mainEl.style.visibility = "hidden"
+     
 
     let filterSection = document.createElement("aside")
     filterSection.setAttribute("class", "filters-section")
@@ -85,16 +91,6 @@ function composeSearchBar(){
     })
 }
 
-function composeList(){
-    let articleEl = document.querySelector("article")
-
-    let breweriesUl = document.createElement("ul")
-    breweriesUl.setAttribute("class","breweries-list")
-
-    articleEl.append(breweriesUl)  
-    
-}
-
 function composeTypeFilter(){
     let filtersAside = document.querySelector(".filters-section")
     let h2El = document.createElement("h2")
@@ -131,11 +127,6 @@ function composeTypeFilter(){
 
     typeForm.append(typeLabel,typeSelect)
     typeSelect.append(emptyOption, microOption, regionalOption, brewpubOption)
-    filtersAside.append(h2El,typeForm)
-}
-
-function composeCityFilter(){
-    let filtersAside = document.querySelector(".filters-section")
 
     let cityHeadDiv = document.createElement("div")
     cityHeadDiv.setAttribute("class", "filter-by-city-heading")
@@ -148,27 +139,38 @@ function composeCityFilter(){
     clearBtn.innerText = "Clear all"
     cityHeadDiv.append(h3El, clearBtn)
 
+    filtersAside.append(h2El, typeForm, cityHeadDiv)
+}
+
+function composeCityFilter(){
+    let perviousForm = document.querySelector("#filter-by-city-form")
+    if (perviousForm !== null)perviousForm.remove()
+
+    let filtersAside = document.querySelector(".filters-section")
+
     let cityForm = document.createElement("form")
     cityForm.setAttribute("id", "filter-by-city-form")
 
-    // composeCityCheckbox(state.cities[0])
-    filtersAside.append(cityHeadDiv)
+    for(city of state.cities){
+       let checkboxEls = createCityCheckbox(city)
+       cityForm.append(checkboxEls[0], checkboxEls[1])
+    }
+    
+    filtersAside.append(cityForm)
 }
 
-// function composeCityCheckbox(city){
+function createCityCheckbox(city){
+    let cityFilterInput = document.createElement("input")
+    cityFilterInput.setAttribute("type", "checkbox")
+    cityFilterInput.setAttribute("name", city)
+    cityFilterInput.setAttribute("value", city)
+
+    let cityFilterLabel = document.createElement("label")
+    cityFilterLabel.setAttribute("for", city)
+    cityFilterLabel.innerText = city
     
-
-//     let cityFilterInput = document.createElement("input")
-//     cityFilterInput.setAttribute("type", "checkbox")
-//     cityFilterInput.setAttribute("name", city)
-//     cityFilterInput.setAttribute("value", city)
-
-//     let cityFilterLabel = document.createElement("label")
-//     cityFilterLabel.setAttribute("for", city)
-//     cityFilterLabel.innerText = city
-
-//     cityForm.append(cityFilterInput, cityFilterLabel)    
-// }
+    return [cityFilterInput , cityFilterLabel]
+}
 
 function pushCitiesToState(){
     for (brewery of state.breweries){
@@ -183,7 +185,17 @@ function pushCitiesToState(){
 }
 
 function renderBreweries(arrayOfBreweries){
-    arrayOfBreweries.map(renderBrewery)
+    let perviousList = document.querySelector("ul")
+    if (perviousList !== null)perviousList.remove()
+
+    let articleEl = document.querySelector("article")
+    let breweriesUl = document.createElement("ul")
+    breweriesUl.setAttribute("class","breweries-list")
+
+    articleEl.append(breweriesUl) 
+
+    firstTenBreweries = arrayOfBreweries.slice(0, 10)
+    firstTenBreweries.map(renderBrewery)
 }
 
 function renderBrewery(brewery){
@@ -217,22 +229,31 @@ function filterByState(){
     let formInput = document.querySelector("#select-state")
     selectStateForm.addEventListener("submit", function(event){
         event.preventDefault()
+        clearState()
+        
+        let mainEl = document.querySelector("main")
+        mainEl.style.visibility = "visible"
 
         getBreweriesByState(formInput.value)
         .then(function(breweries){
             pushCleanDataToState(breweries)
-            composeMain()
-            composeSearchBar()
-            composeTypeFilter()
+            
         })
         .then(function(){
-            composeList()
             pushCitiesToState()
             renderBreweries(state.breweries)
+            composeCityFilter()
         })
 
         selectStateForm.reset()
     })
+}
+
+function clearState(){
+    state = {
+        breweries:[],
+        cities:[]
+    }
 }
 
 function removeCurrentDisplayList(){
@@ -245,8 +266,18 @@ function removeLi(liEl){
     liEl.remove()
 }
 
-filterByState()
+function clearCityAndListOnPage (){
 
+}
+
+function runPage(){
+    composeMain()
+    composeSearchBar()
+    composeTypeFilter()
+    filterByState()
+}
+    
+runPage()
 
 
 
