@@ -79,18 +79,34 @@ function composeSearchBar(){
         event.preventDefault()
         removeCurrentDisplayList()
 
-        matchedResultArray = state.breweries.filter(function(brewery){
-            let lowercaseName = brewery.name.toLowerCase()
-            let lowercaseState = brewery.state.toLowerCase()
-            let lowercaseAddress = brewery.street.toLowerCase()
-        
-            let lowercaseSearchInput = searchInput.value.toLowerCase()
-            return lowercaseName.includes(lowercaseSearchInput) || lowercaseState.includes(lowercaseSearchInput) || lowercaseAddress.includes(lowercaseSearchInput)
-        })
+        let lowercaseSearchInput = searchInput.value.toLowerCase()
+        let searchResult=[]
 
-        renderBreweries(matchedResultArray)
+        if(state.cityFilteredBreweries !== undefined) {
+            searchResult = createSearchResultBreweries(lowercaseSearchInput, state.cityFilteredBreweries)
+        }
+        else if (state.typeFilteredBreweries !== undefined){
+            searchResult = createSearchResultBreweries(lowercaseSearchInput, state.typeFilteredBreweries)
+        }
+        else {
+            searchResult = createSearchResultBreweries(lowercaseSearchInput, state.breweries)
+        }
+
+        renderBreweries(searchResult)
         searchForm.reset()
     })
+}
+
+function createSearchResultBreweries(lowercaseSearchInput, currentShowBreweries){
+    let matchedResultArray = currentShowBreweries.filter(function(brewery){
+        let lowercaseName = brewery.name.toLowerCase()
+        let lowercaseState = brewery.state.toLowerCase()
+        let lowercaseAddress = brewery.street.toLowerCase()
+
+        return lowercaseName.includes(lowercaseSearchInput) || lowercaseState.includes(lowercaseSearchInput) || lowercaseAddress.includes(lowercaseSearchInput)
+    })
+
+    return matchedResultArray
 }
 
 function composeTypeFilter(){
@@ -114,6 +130,7 @@ function composeTypeFilter(){
 
         if(event.target.value === ""){
             renderBreweries(state.breweries)
+            state.typeFilteredBreweries = undefined
         }
         else{
             state.typeFilteredBreweries = state.breweries.filter(function(brewery){
@@ -146,6 +163,7 @@ function clearAllCityCheckbox(){
     let cityForm = document.getElementById("filter-by-city-form")
     let allCheckBox = cityForm.querySelectorAll("input")
     allCheckBox.forEach(uncheckBox)
+    state.cityFilteredBreweries = undefined
 }
 
 function composeCityFilterHead(){
@@ -241,6 +259,7 @@ function removeCheckedCity(checkedCity){
         else{
             renderBreweries(state.breweries)
         }
+        state.cityFilteredBreweries = undefined
     }
 }
 
