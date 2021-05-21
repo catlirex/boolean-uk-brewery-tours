@@ -1,6 +1,5 @@
 let state = {
     breweries:[],
-    cities:[],
     cityFilteredBreweries:[],
     typeFilteredBreweries:[],
     endIndex:0
@@ -217,7 +216,9 @@ function composeCityFilter(){
 
     })
 
-    for(city of state.cities){
+    cityArray = getCitiesList()
+
+    for(city of cityArray){
        let checkboxEls = createCityCheckbox(city)
        cityForm.append(checkboxEls[0], checkboxEls[1])
     }
@@ -259,7 +260,6 @@ function removeCheckedCity(checkedCity){
         else{
             renderBreweries(state.breweries)
         }
-        state.cityFilteredBreweries = undefined
     }
 }
 
@@ -276,16 +276,20 @@ function createCityCheckbox(city){
     return [cityFilterInput , cityFilterLabel]
 }
 
-function pushCitiesToState(){
-    for (brewery of state.breweries){
-        indexCheck = state.cities.findIndex(function(city){
-            brewery.city === city
-        })
+function getCitiesList(){
+    let repeatedCities = state.breweries.map(function(brewery){
+        return brewery.city
+    })
 
-        if (indexCheck === -1){
-            state.cities.push(brewery.city)
-        }
-    }
+    const uniqueCities = unique(repeatedCities)
+    uniqueCities.sort()
+
+    return uniqueCities
+
+}
+
+function unique(array){
+  return  [... new Set(array)]
 }
 
 function renderBreweries(arrayOfBreweries){
@@ -465,8 +469,6 @@ function filterByState(){
             
         })
         .then(function(){
-            
-            pushCitiesToState()
             renderBreweries(state.breweries)
             composeCityFilter()
             
