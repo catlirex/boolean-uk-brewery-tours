@@ -123,6 +123,9 @@ function composeTypeFilter(){
             })
             renderBreweries(state.typeFilteredBreweries)
         }
+        let cityForm = document.getElementById("filter-by-city-form")
+        let allCheckBox = cityForm.querySelectorAll("input")
+        allCheckBox.forEach(uncheckBox)
     })
 
     let emptyOption = document.createElement("option")
