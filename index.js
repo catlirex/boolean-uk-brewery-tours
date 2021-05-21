@@ -42,8 +42,7 @@ function pushCleanDataToState(data){
 
 function composeMain(){
     let mainEl = document.querySelector("main")
-        mainEl.style.visibility = "hidden"
-     
+    mainEl.style.visibility = "hidden"
 
     let filterSection = document.createElement("aside")
     filterSection.setAttribute("class", "filters-section")
@@ -103,7 +102,6 @@ function composeTypeFilter(){
     typeForm.setAttribute("id", "filter-by-type-form")
     typeForm.setAttribute("autocompete", "off")
     
-
     let typeLabel = document.createElement("label")
     typeLabel.setAttribute("for", 'filter-by-type')
     typeLabel.innerHTML = '<h3>Type of Brewery</h3>'
@@ -123,31 +121,31 @@ function composeTypeFilter(){
             })
             renderBreweries(state.typeFilteredBreweries)
         }
-        let cityForm = document.getElementById("filter-by-city-form")
-        let allCheckBox = cityForm.querySelectorAll("input")
-        allCheckBox.forEach(uncheckBox)
+        clearAllCityCheckbox()
     })
 
     let emptyOption = document.createElement("option")
     emptyOption.setAttribute("value", "")
     emptyOption.innerText = "Select a type..."
+    typeSelect.append(emptyOption)
 
-    let microOption = document.createElement("option")
-    microOption.setAttribute("value", "micro")
-    microOption.innerText = "Micro"
+    let typesArray = ["micro", "regional", "brewpub"]
+    for(type of typesArray){
+        let typeOption = document.createElement("option")
+        typeOption.setAttribute("value", type)
+        typeOption.innerText = type[0].toUpperCase() + type.substring(1)
 
-    let regionalOption = document.createElement("option")
-    regionalOption.setAttribute("value", "regional")
-    regionalOption.innerText = "Regional"
+        typeSelect.append(typeOption)
+    }
     
-    let brewpubOption = document.createElement("option")
-    brewpubOption.setAttribute("value", "brewpub")
-    brewpubOption.innerText = "Brewpub"
-
     typeForm.append(typeLabel,typeSelect)
-    typeSelect.append(emptyOption, microOption, regionalOption, brewpubOption)
-
     filtersAside.append(h2El, typeForm)
+}
+
+function clearAllCityCheckbox(){
+    let cityForm = document.getElementById("filter-by-city-form")
+    let allCheckBox = cityForm.querySelectorAll("input")
+    allCheckBox.forEach(uncheckBox)
 }
 
 function composeCityFilterHead(){
@@ -163,9 +161,7 @@ function composeCityFilterHead(){
     clearBtn.setAttribute("class", "clear-all-btn")
     clearBtn.innerText = "Clear all"
     clearBtn.addEventListener("click", function(){
-        let cityForm = document.getElementById("filter-by-city-form")
-        let allCheckBox = cityForm.querySelectorAll("input")
-        allCheckBox.forEach(uncheckBox)
+        clearAllCityCheckbox()
 
         if (state.typeFilteredBreweries !== undefined){
             renderBreweries(state.typeFilteredBreweries)
@@ -292,8 +288,7 @@ function renderBreweries(arrayOfBreweries){
     
     if(arrayOfBreweries.length > state.endIndex)
     nextPage(arrayOfBreweries, state.endIndex)
- }
-
+}
 
 function nextPage(arrayOfBreweries, endIndex){
     
@@ -440,7 +435,7 @@ function filterByState(){
     let formInput = document.querySelector("#select-state")
     selectStateForm.addEventListener("submit", function(event){
         event.preventDefault()
-        clearState()
+        clearStateData()
         
         let mainEl = document.querySelector("main")
         mainEl.style.visibility = "visible"
@@ -462,7 +457,7 @@ function filterByState(){
     })
 }
 
-function clearState(){
+function clearStateData(){
     state = {
         breweries:[],
         cities:[]
@@ -477,10 +472,6 @@ function removeCurrentDisplayList(){
 
 function removeLi(liEl){
     liEl.remove()
-}
-
-function clearCityAndListOnPage (){
-
 }
 
 function runPage(){
